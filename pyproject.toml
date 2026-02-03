@@ -1,0 +1,7 @@
+[project]
+name = "code-simple-rag-from-scartch"
+version = "0.1.0"
+description = "Code a simple RAG from scratch"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ['ollama']

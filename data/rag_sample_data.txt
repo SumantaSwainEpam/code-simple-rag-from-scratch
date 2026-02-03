@@ -1,0 +1,55 @@
+RAG (Retrieval Augmented Generation) Overview
+
+RAG stands for Retrieval Augmented Generation.
+It is a technique that improves Large Language Model (LLM) responses by retrieving relevant external data before generating an answer.
+
+Why RAG is Needed
+Large Language Models are trained on static data.
+They do not have access to private documents or real-time updates.
+RAG helps reduce hallucinations by grounding responses in retrieved knowledge.
+
+Core Components of RAG
+1. Documents: PDFs, text files, databases, logs, or web pages.
+2. Chunking: Breaking large documents into smaller pieces.
+3. Embeddings: Converting text into numerical vectors.
+4. Vector Database: Storing and searching embeddings using similarity.
+5. LLM: Generates final answers using retrieved context.
+
+Chunking Strategy
+Typical chunk size ranges from 300 to 500 tokens.
+Overlapping chunks help preserve context.
+Bad chunking can reduce retrieval accuracy.
+
+Embeddings
+Embeddings capture semantic meaning.
+Similar texts produce similar vectors.
+Popular embedding models include OpenAI, Sentence Transformers, and Cohere.
+
+Vector Databases
+Vector databases allow semantic search.
+Popular options include FAISS, Chroma, Pinecone, and Weaviate.
+They store embeddings along with original text.
+
+RAG Query Flow
+User asks a question.
+The question is converted into an embedding.
+Vector database retrieves relevant chunks.
+Retrieved chunks are passed to the LLM.
+LLM generates an answer based on context.
+
+Prompt Engineering for RAG
+The LLM should be instructed to answer only using provided context.
+If the answer is not found, the model should respond with 'I don't know'.
+
+Advanced RAG Concepts
+Hybrid search combines keyword and vector search.
+Re-ranking improves retrieval accuracy.
+Metadata filtering narrows search scope.
+Agentic RAG allows multi-step reasoning.
+
+RAG Use Cases
+Internal documentation Q&A.
+Customer support chatbots.
+Test case generation for QA automation.
+Bug analysis from logs.
+Knowledge assistants for enterprises.
