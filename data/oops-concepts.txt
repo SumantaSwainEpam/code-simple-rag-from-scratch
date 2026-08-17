@@ -1,0 +1,20 @@
+Object-Oriented Programming (OOP) is a programming paradigm based on the concept of objects, which contain data and code.
+A Class is a blueprint or template used to create objects, defining their attributes and behaviors.
+An Object is an instance of a class, representing a concrete entity with state and behavior.
+The four core pillars of OOP are Encapsulation, Inheritance, Polymorphism, and Abstraction.
+Encapsulation bundles data and the methods that operate on that data within a single unit or class, restricting direct access.
+Inheritance allows a new class to inherit attributes and behaviors from an existing class, promoting code reuse.
+Polymorphism allows objects of different classes to respond differently to the same method call, enabling a single interface for different types.
+Abstraction hides complex implementation details and exposes only the essential features of an object or system.
+Method Overriding occurs when a subclass defines a specific implementation of a method that exists in its superclass.
+Method Overloading allows multiple methods to have the same name but different parameters within the same class.
+An Abstract Class is a class that cannot be instantiated and serves as a template with abstract methods subclassed must implement.
+An Interface defines a contract of method signatures that implementing classes must fulfill without detailing how.
+Composition is a design principle where a class contains references to objects of other classes, modeled as a "has-a" relationship.
+Aggregation is a form of composition where the contained object can exist independently of the container.
+The "is-a" relationship is represented by inheritance, while the "has-a" relationship is represented by composition.
+Constructor is a special method called automatically when an object of a class is instantiated.
+Destructor is a method invoked automatically before an object is destroyed or garbage collected.
+Access Modifiers like public, private, and protected control the visibility and scope of class members.
+Static members belong to the class itself rather than instances of the class, shared across all objects.
+Interface segregation principle states that clients should not be forced to depend on interfaces they do not use.

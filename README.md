@@ -1,159 +1,162 @@
 # Simple RAG from Scratch
 
-A minimal **Retrieval-Augmented Generation (RAG)** implementation built from scratch. It loads a list of cat facts, embeds each fact as a chunk with Ollama, retrieves relevant chunks by cosine similarity, and answers questions using a local LLM with the retrieved context.
+A minimal, terminal-based **Retrieval-Augmented Generation (RAG)** implementation built from scratch. It dynamically loads documents from the `data` directory, embeds each line as a chunk with Ollama, retrieves relevant chunks by cosine similarity, and answers questions using a local LLM with the retrieved context.
 
 ### How it works
 
-1. **Index:** Load `data/cat-facts.txt`, embed each line with the embedding model, and store (embedding, chunk) pairs in an in-memory vector store.
-2. **Retrieve:** For your question, embed the query, compute cosine similarity with all chunks, and return the top 3.
-3. **Generate:** Build a system prompt with only those chunks; the language model answers using that context (no extra knowledge).
+1. **Scan & Index:** Automatically scans the `data/` directory, loads all text files (`.txt`), embeds each non-empty line with the embedding model, and stores the (embedding, chunk) pairs in an in-memory vector database.
+2. **Retrieve:** When a query is submitted, the system embeds it, computes cosine similarity across all database chunks, and returns the top matching results.
+3. **Generate:** Builds a system prompt with only the retrieved context chunks, guiding the local language model (LLM) to answer the query solely using the compiled facts.
 
-## Table of contents
+---
 
-- [Models](#models) · [Dataset](#dataset) · [Features](#features) · [Requirements](#requirements)
-- [Project structure](#project-structure) · [Setup](#setup) · [Usage](#usage) · [Example output](#example-output)
-- [Configuration](#configuration) · [Notes](#notes) · [Author](#author)
+## Table of Contents
+
+- [Models](#models)
+- [Datasets](#datasets)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [Usage (Interactive CLI)](#usage-interactive-cli)
+- [Configuration](#configuration)
+- [Author](#author)
+
+---
 
 ## Models
 
-- **Embedding model:** `hf.co/CompendiumLabs/bge-base-en-v1.5-gguf`
-- **Language model:** `hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF`
+- **Embedding Model:** `hf.co/CompendiumLabs/bge-base-en-v1.5-gguf`
+- **Language Model:** `hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF`
 
-## Dataset
+---
 
-The project uses a simple list of **facts about cats** stored in `data/cat-facts.txt`. Each line (each fact) is treated as **one chunk** during the indexing phase.
+## Datasets
+
+The project automatically consumes any text files (`.txt`) placed in the `data/` directory. Each line is treated as **one chunk** during the indexing phase. The built-in datasets include:
+- `cat-facts.txt`: Facts about cats (150 entries).
+- `dog-facts.txt`: Facts about dogs (15 entries).
+- `oops-concepts.txt`: Key Object-Oriented Programming (OOP) concepts (20 entries).
+- `rag_sample_data.txt`: RAG overview, components, and strategies (45 entries).
+
+---
 
 ## Features
 
-- Load cat facts from a text file (`data/cat-facts.txt`)
-- Embed each fact as a chunk and store in an in-memory vector store
-- Retrieve top-k relevant chunks for a user query using cosine similarity
-- Generate answers via Ollama (streaming) using only the retrieved context
+- **Multi-File Dataset Ingestion**: Scans the `data/` directory to load and index all text files automatically.
+- **Interactive CLI Loop**: Keep the vector database loaded in memory and run multiple queries without rebuilding the index.
+- **Direct Database Search**: Query and retrieve the raw matched text chunks and their similarity scores directly without involving the LLM.
+- **Database Statistics**: View the total counts of loaded chunks and models in use.
+- **Consolidated Progress Logs**: Minimal footprint output when index is populating.
+
+---
 
 ## Requirements
 
 - **Python** >= 3.13
-- **Ollama** installed and running locally (see [Download Ollama and models](#download-ollama-and-models))
-- **ollama** Python package (see [Install the ollama Python package](#install-the-ollama-python-package))
+- **Ollama** installed and running locally (see [Setup](#setup))
+- **ollama** Python package (installed via `pip` or virtual environment synchronization)
+
+---
 
 ## Project Structure
 
-```
+```text
 code-simple-rag-from-scartch/
-├── main.py                 # Entry point: load data, build vector DB, query, and chat
-├── pyproject.toml          # Project metadata and dependencies (ollama)
-├── README.md
-├── data/
-│   ├── cat-facts.txt       # Cat facts dataset (one fact per line = one chunk)
-│   └── rag_sample_data.txt # Optional sample data
+├── main.py                  # Entry point: Interactive shell, search, and LLM chat
+├── pyproject.toml           # Project metadata and dependencies (ollama)
+├── README.md                # Documentation
+├── data/                    # Text datasets folder (reads all *.txt files)
+│   ├── cat-facts.txt        # Facts about cats (one per line)
+│   ├── dog-facts.txt        # Facts about dogs
+│   ├── oops-concepts.txt    # OOP definitions
+│   └── rag_sample_data.txt  # RAG general architecture overview
 └── src/
-    ├── loading_datasets.py  # Loads text file into a list of lines (dataset)
-    ├── impl_vector_db.py    # Vector DB (list of embeddings + chunks), embedding model, add_chunks_to_vector_db()
-    └── impl_retrieval_func.py  # cosine_similarity(), retrieve_chunks(query, top_n=3)
+    ├── loading_datasets.py  # Scans and reads data/*.txt into in-memory list
+    ├── impl_vector_db.py    # Memory database, models, and embeddings addition
+    └── impl_retrieval_func.py  # Cosine similarity and retrieval score ranker (top_n)
 ```
 
-### Module Overview
-
-| File | Purpose |
-|------|---------|
-| `main.py` | Loads dataset, populates vector DB, prompts for a question, retrieves top chunks, builds system prompt with context, and streams the LLM response. |
-| `src/loading_datasets.py` | Opens `data/cat-facts.txt` (UTF-8), reads lines into `dataset`. |
-| `src/impl_vector_db.py` | Defines `EMBEDDING_MODEL`, `LANGUAGE_MODEL`, `VECTOR_DB`, and `add_chunks_to_vector_db(chunk)` using Ollama embeddings. |
-| `src/impl_retrieval_func.py` | Computes cosine similarity, embeds the query, scores all chunks, returns top `top_n` as `(chunk, similarity)` pairs. |
+---
 
 ## Setup
 
-### Download Ollama and models
+### 1. Download Ollama and Models
 
-1. **Install Ollama** from the project website: [ollama.com](https://ollama.com).
-
-2. After installation, open a terminal and run the following commands to download the required models:
-
+1. Install Ollama from [ollama.com](https://ollama.com).
+2. Start the Ollama app or service, then download the required models in your terminal:
    ```bash
    ollama pull hf.co/CompendiumLabs/bge-base-en-v1.5-gguf
    ollama pull hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF
    ```
 
-3. If you see output like the following, the models were downloaded successfully:
+### 2. Install Dependencies
 
-   ```
-   pulling manifest
-   ...
-   verifying sha256 digest
-   writing manifest
-   success
-   ```
-
-### Install the ollama Python package
-
-To use Ollama from Python, install the **ollama** package:
-
+Using **pip** directly:
 ```bash
 pip install ollama
 ```
 
-If you use [uv](https://github.com/astral-sh/uv) for this project, run from the project root:
-
+Or using **uv** (recommended) from the project root:
 ```bash
 uv sync
 ```
 
-This installs the project dependencies (including `ollama`) from `pyproject.toml`.
+---
 
-## Usage
+## Usage (Interactive CLI)
 
-Run from the **project root** (so `data/` and `src` imports resolve correctly):
+Start the program from the project root directory:
 
 ```bash
 uv run main.py
 ```
-
-Or with Python directly:
-
+Or:
 ```bash
 python main.py
 ```
 
-1. The script loads `data/cat-facts.txt` and embeds each fact (each line) into the vector DB.
-2. You are prompted: **Ask me a question:**
-3. It retrieves the top 3 most similar chunks and prints them with similarity scores.
-4. The chatbot answers using only that context; the response is streamed in the terminal.
+### Flow and Menu Options
 
-## Example output
+1. The script will load all datasets and display progress:
+   ```text
+   Initializing vector database...
+   Loaded 150 entries from cat-facts.txt
+   Loaded 15 entries from dog-facts.txt
+   Loaded 20 entries from oops-concepts.txt
+   Loaded 45 entries from rag_sample_data.txt
+   Progress: 10/230 chunks added.
+   ...
+   Progress: 230/230 chunks added.
 
-After running `uv run main.py` or `python main.py`, you’ll see the indexing messages, then the prompt. Example with the question *"How much do cats sleep?"*:
+   === RAG System Initialized ===
+   ```
 
-```
-Loaded 150 entries
-Added chunk 1 of 150 to vector database
-Added chunk 2 of 150 to vector database
-...
-Added chunk 150 of 150 to vector database
+2. Choose from the CLI Menu:
+   ```text
+   ========================================
+   Select an option:
+   1. Ask the Chatbot (RAG)
+   2. Search Vector Database (Direct)
+   3. View Database Statistics
+   4. Exit
+   ========================================
+   Enter choice (1-4):
+   ```
 
-Ask me a question: How much do cats sleep?
+* **Option 1**: Asks a question, retrieves the top 3 relevant chunks, displays their similarity score, and feeds them to the LLM to stream a context-grounded response.
+* **Option 2**: Performs a vector-based semantic search across all facts, returning the top 5 match candidates (no LLM generation).
+* **Option 3**: Displays database telemetry (total size, models configured).
+* **Option 4**: Safely exits the application.
 
-Retrieved knowledge:
- - (similarity: 0.89) On average, cats spend 2/3 of every day sleeping. That means a nine-year-old cat has been awake for only three years of its life.
- - (similarity: 0.72) A cat's brain is biologically more similar to a human brain than it is to a dog's. Both humans and cats have identical regions in their brains that are responsible for emotions.
- - (similarity: 0.68) Cats make about 100 different sounds. Dogs make only about 10.
-
-Chatbot response:
-On average, cats spend about two-thirds of every day sleeping. So a nine-year-old cat has been awake for only around three years of its life.
-```
-
-The similarity scores and chatbot reply depend on the embedding and language models; your run may differ slightly.
+---
 
 ## Configuration
 
-- **Data file**: Edit `src/loading_datasets.py` to change the path (e.g. to `data/rag_sample_data.txt`) or loading logic. The default is `data/cat-facts.txt` (one fact per line = one chunk).
-- **Models**: The project uses `hf.co/CompendiumLabs/bge-base-en-v1.5-gguf` (embedding) and `hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF` (language). Edit `EMBEDDING_MODEL` and `LANGUAGE_MODEL` in `src/impl_vector_db.py` to use other Ollama models.
-- **Retrieval**: Change `top_n` in `retrieve_chunks(query, top_n=3)` in `main.py` (default is 3) or when calling the function.
+- **Models**: If you wish to use different GGUF weights, edit `EMBEDDING_MODEL` and `LANGUAGE_MODEL` inside `src/impl_vector_db.py`.
+- **Top K Settings**: Modify `top_n` parameters within menu options in `main.py` to get more or fewer matched chunks.
 
-## Notes
-
-- **Ollama must be running** before you start the script (e.g. start the Ollama app or run `ollama serve`).
-- **Run from the project root** so that `data/cat-facts.txt` and `from src.*` imports work.
-- The data file is read with **UTF-8** encoding; use UTF-8 for custom data files.
+---
 
 ## Author
 
